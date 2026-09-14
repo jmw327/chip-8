@@ -46,21 +46,16 @@ impl Chip8 {
 
     pub fn load(&mut self, path: &Path) -> anyhow::Result<()> {
         let bytes = fs::read(path)?;
-        println!("Read {} bytes", bytes.len());
+        let start = 0x200;
+        let max_size = self.memory.len() - start;
 
-        let max_size = self.memory.len() - 0x200;
-        if bytes.len() > max_size {
-            return Err(anyhow::anyhow!(
-                "Rom exceeds {}B memory limit",
-                self.memory.len()
-            ));
-        }
+        anyhow::ensure!(
+            bytes.len() <= max_size,
+            "rom exceeds {max_size}B memory limit"
+        );
 
-        for (current, byte) in (0x200..).zip(bytes) {
-            self.memory[current] = byte;
-        }
+        self.memory[start..start + bytes.len()].copy_from_slice(&bytes);
 
-        println!("Loaded rom into memory");
         Ok(())
     }
 

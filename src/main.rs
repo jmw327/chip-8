@@ -32,10 +32,7 @@ struct App {
 impl App {
     fn new(path: &Path) -> anyhow::Result<Self> {
         let mut chip8 = Chip8::new();
-        if let Err(error) = chip8.load(path) {
-            eprintln!("Error loading rom: {error}");
-            return Err(anyhow::anyhow!(error));
-        }
+        chip8.load(path).context("failed to load ROM")?;
 
         Ok(Self {
             window: None,
